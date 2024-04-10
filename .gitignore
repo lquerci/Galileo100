@@ -162,6 +162,7 @@ cython_debug/
 
 #LAPO
 /output
-test.ipynb
-notes.pdf
 Ltest*
+
+# virtual environment for python
+/my_venv

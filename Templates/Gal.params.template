@@ -1,0 +1,75 @@
+###################
+# Global parameters
+###################
+# Virial velocity of the galaxy [km/s]
+v200 			        300.0
+# Virial mass of the galaxy [1e10 Msol]
+# Overrides the v200 parameter
+m200				    ${M_200}
+
+
+# Refinement level of the potential grid 
+level_coarse		    	8
+# Refinement level of the plane plane density grid 
+level_grid_mid_dens		    8
+# Refinement level of the turbulence grid 
+level_grid_turb		    	8
+# Refinement level of the gaussian field grid
+level_grid_dens_fluct       8
+
+# Size of the potential grid [kpc]
+boxsize1		     	8.0 #2.5 virial rad
+boxsize2	 	        4.0  #~ virial rad
+boxsize3	 	        0.05 #stellar rad
+
+# Dispersion for the Gaussian field fluctuations
+dens_fluct_sigma        0.50
+# Physical injection scale of the random field fluctuations [kpc]
+dens_fluct_scale_inj    2.00
+# Physical dissipation scale of the random field fluctuations [kpc]
+dens_fluct_scale_diss   0.25
+dens_fluct_seed		   	1212
+# Seed for the random number generator
+seed			        1246
+# Switch to MCMC ntry algorithm to position particles for a value > 1
+mcmc_ntry		        10
+# Number of iterations to reach hydrostatic equilibrium (zero to deactivate)
+hydro_eq_niter			0 #3
+
+#######################
+# Component 1: Halo
+#######################
+# Particles type (GADGET format -- 0=Gas,1=Halo,2=Disk,3=Bulge,4=Stars)
+type1			        1
+# Fraction of the virial mass in the component 1
+mass_frac1		        ${DM_MASS_FRAC}
+# Number of particles for the component 1
+npart1			        ${DM_NPART}
+# Number of particles for the potential computation
+npart_pot1             	${DM_NPART_POT}
+
+# Component 1 density model
+model1			        8 #8 NFW
+#Scale length of the density profile
+concentration1          3.5 #Diemer & Kravtsov 2015
+#Component 2 radial density cut
+#cut1                   3 #r_vir
+
+#######################
+# Component 2: Star
+#######################
+# Particles type (GADGET format -- 0=Gas,1=Halo,2=Disk,3=Bulge,4=Stars)
+type2			        3
+# Fraction of the virial mass in the component 1
+mass_frac2		        ${STAR_MASS_FRAC}
+# Number of particles for the component 1
+npart2			        ${STAR_NPART}
+# Number of particles for the potential computation
+npart_pot2             	${STAR_NPART_POT}
+
+# Component 2 density model
+model2			        3 #sperical exponential
+#Scale length of the density profile
+scale_length2           ${STAR_RSCALE}
+#Component 2 radial density cut
+cut2                    ${STAR_RSCALE_CUT}
