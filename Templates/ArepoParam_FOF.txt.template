@@ -9,7 +9,7 @@ ICFormat                                2
 SnapFormat                              3
 
 %---- CPU-time limits
-TimeLimitCPU                            720000 #35 hours limit
+TimeLimitCPU                            ${TimeLimitCPU} #35 hours limit
 CpuTimeBetRestartFile                   86400
 ResubmitOn                              0
 ResubmitCommand                         my-scriptfile

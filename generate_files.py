@@ -1,6 +1,6 @@
 import os
 import numpy as np
-import configparser
+import configparser, datetime
 from astropy import units as u
 import matplotlib.pyplot as plt
 import lib_LHS as lib_LHS
@@ -8,7 +8,13 @@ import lib_LHS as lib_LHS
 
 # directories
 template_dir  = '/g100/home/userexternal/lquerci0/codes/Templates'
-output_dir    = '/g100/home/userexternal/lquerci0/codes/LatinHypercubeSampling/mdm_100'
+# $HOME
+output_dir    = '/g100/home/userexternal/lquerci0/codes/Ltest_LatinHypercubeSampling/mdm_100'
+# $WORK
+#output_dir    = '/g100_work/IscrC_UFD-SHF/Ltest_LatinHypercubeSampling/mdm_100'
+# $SCRATCH
+#output_dir    = '/g100_scratch/userexternal/lquerci0/Ltest_LatinHypercubeSampling/mdm_10000_v1'
+
 try:
     os.makedirs(output_dir)
 except FileExistsError:
@@ -26,6 +32,11 @@ x_distance = 8 * u.kpc
 # read the values from file
 LHS_cube = np.loadtxt('LHS_cube.txt')
 n_simulations = len(LHS_cube)
+
+# read the optimized end file
+end_file_array = np.loadtxt('optimized_end_time.txt')
+CPUlimit_array = np.loadtxt('optimized_timelimitCPU.txt')
+
 
 # galaxies masses 
 Gal1_Mstar,Gal1_Mdm , Gal2_Mstar ,Gal2_Mdm = lib_LHS.compute_masses_from_LHScube(LHS_cube)
@@ -168,16 +179,45 @@ for ith_simulation in range(n_simulations):
     print("Template file dice  has been processed and result written")
 
 
+    #
+    # === SLURM job ===
+    #
+
+    # set the hardware 
+    slurm_sub = {}
+    slurm_sub['run_name'] = ith_simulation
+    slurm_sub['nodes'] = 2
+    slurm_sub['ntasks-per-node'] = 48
+    slurm_sub['cpus-per-task'] = 1
+    # set the computational time
+    n_cpus         = slurm_sub['nodes'] * slurm_sub['ntasks-per-node'] * slurm_sub['cpus-per-task']
+    CPUlimit_hrs   = CPUlimit_array[ith_simulation]/n_cpus * 1000/m_dm
+    job_time_limit = datetime.timedelta(seconds=round(CPUlimit_hrs*3600))
+    slurm_sub['time'] = job_time_limit
+
+    # convert numbers to strings
+    for y in slurm_sub:
+        slurm_sub[y] = str(slurm_sub[y])
+    
+    slurm_template= os.path.join(template_dir, 'job.sh.template')
+    slurm_output  = os.path.join(simulation_dir  , 'job.sh')
+    lib_LHS.replace_values_in_template(slurm_template, slurm_output, slurm_sub)
+    print("Template file job has been processed and result written")
 
     #
     # === Arepo params ===
     #
+    CPUlimit_sec  = CPUlimit_hrs+3600 
     arepo_template= os.path.join(template_dir, 'ArepoParam_FOF.txt.template')
     arepo_output  = os.path.join(simulation_dir  , 'ArepoParam_FOF.txt')
-    arepo_sub     = {'TIME_END': str(Time_end)}
+    arepo_sub     = {'TIME_END': str(end_file_array[ith_simulation]), 
+                     'TimeLimitCPU' : str(round(CPUlimit_array[ith_simulation]))}
     lib_LHS.replace_values_in_template(arepo_template, arepo_output, arepo_sub)
     print("Template file Arepo has been processed and result written")
 
+
+
+    
     #
     # === summary file ===
     #
@@ -189,9 +229,12 @@ for ith_simulation in range(n_simulations):
     config['Gal2'] = Gal2
     config['dice'] = dice_sub
     config['arepo']= arepo_sub
+    config['slurm']= slurm_sub 
     #write
     summary_file   = os.path.join(simulation_dir,"summary_params.config")
     with open(summary_file, 'w') as configfile:
         config.write(configfile)
 
     print(f"Summary of the params has been written.")
+
+    break
