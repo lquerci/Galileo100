@@ -11,19 +11,22 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=lapo.querci1@unifi.it
 
+# total MPI processes
+N_processes=${n_proc}
 
+# where to find arepo
+export AREPO="$SCRATCH/Ltest_LatinHypercubeSampling/mdm_10000_v1/Arepo1e3FOF"
 
-#export OMP_NUM_THREADS=1
+# file names 
+DiceConfig_File="Dice_merger.config"
+ArepoParam_File="ArepoParam_FOF.txt"
+
 
 module purge
 module load gcc/10.2.0 fftw/3.3.10--openmpi--4.1.1--gcc--10.2.0 gsl/2.7--gcc--10.2.0
 module load hdf5/1.10.7--gcc--10.2.0-threadsafe python/3.11.7--gcc--10.2.0
 
 echo "module loaded"
-
-# file names 
-DiceConfig_File="Dice_merger.config"
-
 
 # generate the IC
 if [ "$(find -maxdepth 1 -name "*.g2" -print -quit)" ]; then
@@ -32,3 +35,21 @@ else
     echo "IC does not exist. Computing $DiceConfig_File"
     dice "$DiceConfig_File" > dice_output.txt
 fi
+
+# set to 1 the OpenMP threads 
+export OMP_NUM_THREADS=1
+
+# Running the sim
+echo "Running the simulation"
+
+mpirun -np ${N_processes} "$AREPO" "${ArepoParam_File}" > arepo_output.txt
+
+# store the exit code from the previous command
+exit_code=$?
+
+echo "Running the simulation ended, read output in arepo_output.txt"
+
+echo "exit code = ${exit_code}"
+
+# exit with the store exit code
+exit ${exit_code}
