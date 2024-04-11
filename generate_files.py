@@ -9,11 +9,11 @@ import lib_LHS as lib_LHS
 # directories
 template_dir  = '/g100/home/userexternal/lquerci0/codes/Templates'
 # $HOME
-output_dir    = '/g100/home/userexternal/lquerci0/codes/Ltest_LatinHypercubeSampling/mdm_100'
+#output_dir    = '/g100/home/userexternal/lquerci0/codes/Ltest_LatinHypercubeSampling/mdm_100'
 # $WORK
 #output_dir    = '/g100_work/IscrC_UFD-SHF/Ltest_LatinHypercubeSampling/mdm_100'
 # $SCRATCH
-#output_dir    = '/g100_scratch/userexternal/lquerci0/Ltest_LatinHypercubeSampling/mdm_10000_v1'
+output_dir    = '/g100_scratch/userexternal/lquerci0/Ltest_LatinHypercubeSampling/mdm_100'
 
 try:
     os.makedirs(output_dir)
@@ -193,7 +193,8 @@ for ith_simulation in range(n_simulations):
     n_cpus         = slurm_sub['nodes'] * slurm_sub['ntasks-per-node'] * slurm_sub['cpus-per-task']
     CPUlimit_hrs   = CPUlimit_array[ith_simulation]/n_cpus * 1000/m_dm
     job_time_limit = datetime.timedelta(seconds=round(CPUlimit_hrs*3600))
-    slurm_sub['time'] = job_time_limit
+    slurm_sub['time']   = job_time_limit
+    slurm_sub['n_proc'] = n_cpus
 
     # convert numbers to strings
     for y in slurm_sub:
@@ -237,4 +238,3 @@ for ith_simulation in range(n_simulations):
 
     print(f"Summary of the params has been written.")
 
-    break
