@@ -7,7 +7,7 @@ Galaxy  Gal1.params  ${XX_1}   ${YY_1}   0.0     ${VX_1}     0.0       0.0      
 Galaxy  Gal2.params  ${XX_2}   ${YY_2}   0.0     ${VX_2}     0.0       0.0        0.        0.
 
 # Number of OpenMP threads
-Nthreads                8
+Nthreads                4
 # Compute the mean inter-particle distance
 # Useful to define the softening length in SPH codes
 MeanPartDist            0

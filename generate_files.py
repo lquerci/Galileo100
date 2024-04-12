@@ -9,11 +9,11 @@ import lib_LHS as lib_LHS
 # directories
 template_dir  = '/g100/home/userexternal/lquerci0/codes/Templates'
 # $HOME
-#output_dir    = '/g100/home/userexternal/lquerci0/codes/Ltest_LatinHypercubeSampling/mdm_100'
+output_dir    = '/g100/home/userexternal/lquerci0/codes/Ltest_LatinHypercubeSampling/mdm_100'
 # $WORK
 #output_dir    = '/g100_work/IscrC_UFD-SHF/Ltest_LatinHypercubeSampling/mdm_100'
 # $SCRATCH
-output_dir    = '/g100_scratch/userexternal/lquerci0/Ltest_LatinHypercubeSampling/mdm_100'
+#output_dir    = '/g100_scratch/userexternal/lquerci0/LatinHypercubeSampling/mdm_100'
 
 try:
     os.makedirs(output_dir)
@@ -26,7 +26,6 @@ except Exception as error:
 # fixed values
 m_dm       = 100.
 m_star     = 1.
-Time_end   = 5.0
 x_distance = 8 * u.kpc
 
 # read the values from file
@@ -178,41 +177,56 @@ for ith_simulation in range(n_simulations):
     lib_LHS.replace_values_in_template(dice_template, dice_output, dice_sub)
     print("Template file dice  has been processed and result written")
 
+    #
+    # === SLURM job DICE ===
+    #
+    job_dice_sub = {}
+    job_dice_sub['run_name'] = ith_simulation
+
+    # convert numbers to strings
+    for y in job_dice_sub:
+        job_dice_sub[y] = str(job_dice_sub[y])
+    
+    job_dice_template= os.path.join(template_dir, 'job_dice.sh.template')
+    job_dice_output  = os.path.join(simulation_dir  , 'job_dice.sh')
+    lib_LHS.replace_values_in_template(job_dice_template, job_dice_output, job_dice_sub)
+    print("Template file job_dice has been processed and result written")
+
 
     #
-    # === SLURM job ===
+    # === SLURM job Arepo ===
     #
 
     # set the hardware 
-    slurm_sub = {}
-    slurm_sub['run_name'] = ith_simulation
-    slurm_sub['nodes'] = 2
-    slurm_sub['ntasks-per-node'] = 48
-    slurm_sub['cpus-per-task'] = 1
+    job_arepo_sub = {}
+    job_arepo_sub['run_name'] = ith_simulation
+    job_arepo_sub['nodes'] = 2
+    job_arepo_sub['ntasks-per-node'] = 48
+    job_arepo_sub['cpus-per-task'] = 1
     # set the computational time
-    n_cpus         = slurm_sub['nodes'] * slurm_sub['ntasks-per-node'] * slurm_sub['cpus-per-task']
+    n_cpus         = job_arepo_sub['nodes'] * job_arepo_sub['ntasks-per-node'] * job_arepo_sub['cpus-per-task']
     CPUlimit_hrs   = CPUlimit_array[ith_simulation]/n_cpus * 1000/m_dm
     job_time_limit = datetime.timedelta(seconds=round(CPUlimit_hrs*3600))
-    slurm_sub['time']   = job_time_limit
-    slurm_sub['n_proc'] = n_cpus
+    job_arepo_sub['time']   = job_time_limit
+    job_arepo_sub['n_proc'] = n_cpus
 
     # convert numbers to strings
-    for y in slurm_sub:
-        slurm_sub[y] = str(slurm_sub[y])
+    for y in job_arepo_sub:
+        job_arepo_sub[y] = str(job_arepo_sub[y])
     
-    slurm_template= os.path.join(template_dir, 'job.sh.template')
-    slurm_output  = os.path.join(simulation_dir  , 'job.sh')
-    lib_LHS.replace_values_in_template(slurm_template, slurm_output, slurm_sub)
-    print("Template file job has been processed and result written")
+    job_arepo_template= os.path.join(template_dir, 'job_arepo.sh.template')
+    job_arepo_output  = os.path.join(simulation_dir  , 'job_arepo.sh')
+    lib_LHS.replace_values_in_template(job_arepo_template, job_arepo_output, job_arepo_sub)
+    print("Template file job_arepo has been processed and result written")
 
     #
     # === Arepo params ===
     #
-    CPUlimit_sec  = CPUlimit_hrs+3600 
+    CPUlimit_sec  = CPUlimit_hrs*3600 
     arepo_template= os.path.join(template_dir, 'ArepoParam_FOF.txt.template')
     arepo_output  = os.path.join(simulation_dir  , 'ArepoParam_FOF.txt')
     arepo_sub     = {'TIME_END': str(end_file_array[ith_simulation]), 
-                     'TimeLimitCPU' : str(round(CPUlimit_array[ith_simulation]))}
+                     'TimeLimitCPU' : str(round(CPUlimit_sec))}
     lib_LHS.replace_values_in_template(arepo_template, arepo_output, arepo_sub)
     print("Template file Arepo has been processed and result written")
 
@@ -230,7 +244,8 @@ for ith_simulation in range(n_simulations):
     config['Gal2'] = Gal2
     config['dice'] = dice_sub
     config['arepo']= arepo_sub
-    config['slurm']= slurm_sub 
+    config['job_arepo']= job_arepo_sub 
+    config['job_dice'] = job_dice_sub 
     #write
     summary_file   = os.path.join(simulation_dir,"summary_params.config")
     with open(summary_file, 'w') as configfile:
@@ -238,3 +253,4 @@ for ith_simulation in range(n_simulations):
 
     print(f"Summary of the params has been written.")
 
+    break

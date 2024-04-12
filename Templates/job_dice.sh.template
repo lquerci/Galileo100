@@ -1,0 +1,43 @@
+#!/bin/bash
+#SBATCH --job-name=run_dice_${run_name}
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=4
+#SBATCH --cpus-per-task=1
+#SBATCH --time=00:45:00
+#SBATCH --mem=31200
+#SBATCH --error=%x.%j.err
+#SBATCH --output=%x.%j.out
+#SBATCH --partition=g100_usr_dbg
+#SBATCH --account=IscrC_UFD-SHF
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=lapo.querci1@unifi.it
+
+# set to 1 the OpenMP threads 
+export OMP_NUM_THREADS=4
+
+# file names 
+DiceConfig_File="Dice_merger.config"
+
+
+module purge
+module load gcc/10.2.0 fftw/3.3.10--openmpi--4.1.1--gcc--10.2.0 gsl/2.7--gcc--10.2.0
+module load hdf5/1.10.7--gcc--10.2.0-threadsafe python/3.11.7--gcc--10.2.0
+
+echo "module loaded"
+
+# generate the IC
+if [ "$(find -maxdepth 1 -name "*.g2" -print -quit)" ]; then
+    echo "IC exist."
+else 
+    echo "IC does not exist. Computing $DiceConfig_File"
+    dice "$DiceConfig_File" > dice_output.txt
+
+fi
+
+# store the exit code from the previous command
+exit_code=$?
+
+echo "exit code = ${exit_code}"
+
+# exit with the store exit code
+exit ${exit_code}

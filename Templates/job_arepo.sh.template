@@ -6,7 +6,7 @@
 #SBATCH --time=${time}
 #SBATCH --error=%x.%j.err
 #SBATCH --output=%x.%j.out
-#SBATCH --partition=g100_usr_dbg
+#SBATCH --partition=g100_usr_prod
 #SBATCH --account=IscrC_UFD-SHF
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=lapo.querci1@unifi.it
@@ -15,10 +15,9 @@
 N_processes=${n_proc}
 
 # where to find arepo
-export AREPO="$SCRATCH/Ltest_LatinHypercubeSampling/mdm_10000_v1/Arepo1e3FOF"
+export AREPO="$SCRATCH/LatinHypercubeSampling/mdm_100/Arepo1e4FOF"
 
 # file names 
-DiceConfig_File="Dice_merger.config"
 ArepoParam_File="ArepoParam_FOF.txt"
 
 
@@ -28,12 +27,14 @@ module load hdf5/1.10.7--gcc--10.2.0-threadsafe python/3.11.7--gcc--10.2.0
 
 echo "module loaded"
 
-# generate the IC
+# check if the IC are present
 if [ "$(find -maxdepth 1 -name "*.g2" -print -quit)" ]; then
     echo "IC exist."
 else 
-    echo "IC does not exist. Computing $DiceConfig_File"
-    dice "$DiceConfig_File" > dice_output.txt
+    echo "IC does not exist."
+    echo "Compute it with job_dice.sh before running this job"
+
+    exit 2
 fi
 
 # set to 1 the OpenMP threads 
