@@ -15,7 +15,7 @@ ResubmitOn                              0
 ResubmitCommand                         my-scriptfile
 
 %----- Memory alloction
-MaxMemSize                              2500
+MaxMemSize                              7000 # 90% of the standard memory assigned to each core
 
 %---- Caracteristics of run
 TimeBegin                               0.0  % Begin of the simulation; 0.0078125 z=127
