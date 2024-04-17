@@ -166,3 +166,6 @@ Ltest*
 
 # virtual environment for python
 /my_venv
+
+# output of the sbatch runs
+/jobs_out
