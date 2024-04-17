@@ -9,11 +9,11 @@ import lib_LHS as lib_LHS
 # directories
 template_dir  = '/g100/home/userexternal/lquerci0/codes/Templates'
 # $HOME
-output_dir    = '/g100/home/userexternal/lquerci0/codes/Ltest_LatinHypercubeSampling/mdm_100'
+#output_dir    = '/g100/home/userexternal/lquerci0/codes/Ltest_LatinHypercubeSampling/mdm_100'
 # $WORK
 #output_dir    = '/g100_work/IscrC_UFD-SHF/Ltest_LatinHypercubeSampling/mdm_100'
 # $SCRATCH
-#output_dir    = '/g100_scratch/userexternal/lquerci0/LatinHypercubeSampling/mdm_100'
+output_dir    = '/g100_scratch/userexternal/lquerci0/LatinHypercubeSampling/mdm_100'
 
 try:
     os.makedirs(output_dir)
@@ -73,20 +73,10 @@ for ith_simulation in range(n_simulations):
         print("error type", type(error).__name__)
         exit()
     print("\n\nmoving to", simulation_dir)
+
     #
     # === Galaxies quantities ===
     #
-
-    # masses
-    Gal1 = {}
-    Gal2 = {}
-    Gal1_star_mass = Gal1_Mstar[ith_simulation]
-    Gal2_star_mass = Gal2_Mstar[ith_simulation]
-
-    # mass to light ratio
-    left_bound  = 6000  
-    right_bound = 100000  
-    MtoL_ratio  = left_bound + r_param*(right_bound-left_bound)
 
 
     #
@@ -252,5 +242,3 @@ for ith_simulation in range(n_simulations):
         config.write(configfile)
 
     print(f"Summary of the params has been written.")
-
-    break
