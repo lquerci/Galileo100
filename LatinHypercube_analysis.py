@@ -1,4 +1,4 @@
-import pynbody, h5py, time, lib_LHS, lib_readWrite
+import pynbody, h5py, time, lib_readWrite
 import matplotlib.pylab as plt
 import numpy as np
 
@@ -6,12 +6,11 @@ import numpy as np
 # OUTPUT
 outposition = "LHS_files/"
 
-sim_to_skip = [4, 13,24,27,33,34,48,49] # peculiar simulatinos
-paths      = lib_readWrite.get_LHS_paths(skip = sim_to_skip)
+sim_to_skip = [4, 13,24] # peculiar simulatinos
+paths      = lib_readWrite.get_LHS_paths()
 
 # merger params
 stellar_mass_threshold = 1e1 # in Msun
-buffer_in  = 10 # snaps to skips
 
 # arrays to write
 n_simul     = len(paths)
@@ -39,6 +38,10 @@ for j,basepath in enumerate(paths):
   print()
   print('working on', basepath)
 
+  if np.isin(j, sim_to_skip): 
+    print('skipped simulation')
+    continue
+
   # read the IC from summary params
   summary_param_file = lib_readWrite.read_summary_params_file(path = basepath)
   IC_cube[0,j] = summary_param_file.getfloat('HypercubeValues',"l")
@@ -47,12 +50,12 @@ for j,basepath in enumerate(paths):
   
   dm_mass_frac_gal_1   = summary_param_file.getfloat('Gal1',"dm_mass_frac")
   star_mass_frac_gal_1 = summary_param_file.getfloat('Gal1',"star_mass_frac")
-  IC_cube[3,j] = dm_mass_frac_gal_1/star_mass_frac_gal_1 # mass to light ratio
+  IC_cube[3,j]         = dm_mass_frac_gal_1/star_mass_frac_gal_1 # mass to light ratio
   IC_cube[4,j]         = summary_param_file.getfloat('Gal1',"star_rscale")*1.68 *1e3 # HMR in pc
   
   # additional IC values
-  stellar_mass_gal1    = star_mass_frac_gal_1 * summary_param_file.getfloat('Gal1',"m_200")*1e10 # in Msun
-  addit_IC[0,j] = 0.5*stellar_mass_gal1/(4/3*np.pi*IC_cube[4,j]**3) # mean density
+  stellar_mass_gal1  = star_mass_frac_gal_1 * summary_param_file.getfloat('Gal1',"m_200")*1e10 # in Msun
+  addit_IC[0,j]      = 0.5*stellar_mass_gal1/(4/3*np.pi*IC_cube[4,j]**3) # mean density
 
   # open the snap 
   number_snap    = lib_readWrite.get_number_of_snaps(basepath=basepath)
