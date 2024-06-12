@@ -14,8 +14,8 @@ stellar_mass_threshold = 1e1 # in Msun
 
 # arrays to write
 n_simul     = len(paths)
-HMR_snap    = np.full(n_simul, 1e-4)
-f_5_snap    = np.full(n_simul, 1e-4)
+HMR_snap    = np.full((n_simul,3), 1e-4)
+f_5_snap    = np.full((n_simul,3), 1e-4)
 IC_cube     = np.full((5,n_simul), 1e-4)
 addit_IC    = np.zeros((1, n_simul))
 
@@ -64,21 +64,12 @@ for j,basepath in enumerate(paths):
   snap = pynbody.load(str(snap_path))
   snap.physical_units(distance='pc', velocity='km s^-1', mass='Msol')
 
-  #mask the bounded stars
-  mask_bound_stars = (snap.s['te']< 0.)
 
-  pynbody.analysis.angmom.faceon(snap.s)
-
-  HMR_snap[j] = np.median(snap.s['r'][mask_bound_stars])
-  mask_galaxy_stars = (snap.s['r'][mask_bound_stars] < HMR_snap[j]*30)
-  mask_f_5_stars    = (snap.s['r'][mask_bound_stars][mask_galaxy_stars]> HMR_snap[j]*5) 
-  f_5 = np.sum(mask_f_5_stars)/np.sum(mask_galaxy_stars)
-
-  f_5_snap[j] = max(1e-4,f_5)
+  # compute the half-mass radius and f_5
+  HMR_snap[j], f_5_snap[j] = lib_readWrite.compute_HMR_f5(snap)
 
   print('f_5\t',f_5_snap[j])
   print('HMR\t',HMR_snap[j])
-
 
 
 # write output
